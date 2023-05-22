@@ -5,25 +5,32 @@ using Godot;
 
 namespace rosthouse.sharpest.addons
 {
-    public static class NodeExtensions
+  public static class NodeExtensions
+  {
+
+    public static Godot.Collections.Array<T> GetChildren<[MustBeVariant] T>(this Node n, bool includeInternal = false) where T : Node
     {
-
-        public static Error Connect(this Node node, Type handler, Godot.Object target, FuncRef func, Godot.Collections.Array binds = null, uint flags = 0)
+      var arr = new Godot.Collections.Array<T>();
+      foreach (var c in n.GetChildren(includeInternal))
+      {
+        if (c is T t)
         {
-            return node.Connect(nameof(handler), target, nameof(func), binds, flags);
+          arr.Add(t);
         }
-
-        public static Godot.Collections.Array<T> GetChildren<T>(this Node n) where T : Node
-        {
-            Godot.Collections.Array<T> typed = new Godot.Collections.Array<T>();
-            foreach (Node c in n.GetChildren())
-            {
-                if (c is T)
-                {
-                    typed.Add(c as T);
-                }
-            }
-            return typed;
-        }
+      }
+      return arr;
     }
+
+    public static bool HasChild<[MustBeVariant] T>(this Node n, bool includeInternal = false) where T : Node
+    {
+      foreach (var c in n.GetChildren(includeInternal))
+      {
+        if (c is T)
+        {
+          return true;
+        }
+      }
+      return false;
+    }
+  }
 }
