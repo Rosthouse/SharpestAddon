@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://eg578nrpv8n7"
-path="res://.godot/imported/draw3d.svg-ffe675a6079cbba53c8e16d521836663.ctex"
+path="res://.godot/imported/draw3d.svg-a8e42c81336c435bf9e5ed0771ae0933.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://addons/SharpestAddon/Nodes/draw3d.svg"
-dest_files=["res://.godot/imported/draw3d.svg-ffe675a6079cbba53c8e16d521836663.ctex"]
+source_file="res://addons/SharpestAddon/Autoloads/draw3d.svg"
+dest_files=["res://.godot/imported/draw3d.svg-a8e42c81336c435bf9e5ed0771ae0933.ctex"]
 
 [params]
 
