@@ -24,6 +24,12 @@ public static class PhysicsDirectSpaceState3DExtensions
       this.rid = rid;
       this.shape = shape;
     }
+
+
+    public CollisionObject3D GetCollisionObject3D()
+    {
+      return this.collider.AsGodotObject() as CollisionObject3D;
+    }
   }
   public static Nullable<PhysicsRayQueryResult3D> IntersectRayResult(this PhysicsDirectSpaceState3D dss, PhysicsRayQueryParameters3D parameters)
   {
@@ -41,4 +47,19 @@ public static class PhysicsDirectSpaceState3DExtensions
       shape: result["shape"].AsInt32()
     );
   }
+
+  public static Nullable<PhysicsRayQueryResult3D> CastRayFromCamera(this PhysicsDirectSpaceState3D dss, uint collisionMask = uint.MaxValue, Godot.Collections.Array<Rid> exclude = null, float rayLength = 1000)
+  {
+    var st = (SceneTree)Engine.GetMainLoop();
+    var vp = st.CurrentScene.GetViewport();
+    var p = vp.GetMousePosition();
+    PhysicsRayQueryParameters3D query = new PhysicsRayQueryParameters3D();
+    query.From = vp.GetCamera3D().ProjectRayOrigin(p);
+    query.To = query.From + vp.GetCamera3D().ProjectRayNormal(p) * rayLength;
+    query.CollisionMask = collisionMask;
+    query.Exclude = exclude;
+    var result = dss.IntersectRayResult(query);
+    return result;
+  }
 }
+
