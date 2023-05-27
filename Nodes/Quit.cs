@@ -4,7 +4,7 @@ using System;
 
 namespace rosthouse.sharpest.addons
 {
-    public class Quit : Node
+    public partial class Quit : Node
     {
         [Export] private string quitAction = "ui_end";
         public override void _Input(InputEvent @event)
