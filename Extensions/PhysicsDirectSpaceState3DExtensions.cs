@@ -48,7 +48,7 @@ public static class PhysicsDirectSpaceState3DExtensions
     );
   }
 
-  public static Nullable<PhysicsRayQueryResult3D> CastRayFromCamera(this PhysicsDirectSpaceState3D dss, uint collisionMask = uint.MaxValue, Godot.Collections.Array<Rid> exclude = null, float rayLength = 1000)
+  public static Nullable<PhysicsRayQueryResult3D> CastRayFromCamera(this PhysicsDirectSpaceState3D dss, uint collisionMask = uint.MaxValue, Godot.Collections.Array<Rid> exclude = null, float rayLength = 1000, bool collideWithAreas = false)
   {
     var st = (SceneTree)Engine.GetMainLoop();
     var vp = st.CurrentScene.GetViewport();
@@ -58,6 +58,7 @@ public static class PhysicsDirectSpaceState3DExtensions
     query.To = query.From + vp.GetCamera3D().ProjectRayNormal(p) * rayLength;
     query.CollisionMask = collisionMask;
     query.Exclude = exclude;
+    query.CollideWithAreas = collideWithAreas;
     var result = dss.IntersectRayResult(query);
     return result;
   }
