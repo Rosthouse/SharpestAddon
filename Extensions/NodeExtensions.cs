@@ -32,5 +32,18 @@ namespace rosthouse.sharpest.addons
       }
       return false;
     }
+
+    public static T GetChildByType<[MustBeVariant] T>(this Node n, bool includeInternal = false) where T : Node
+    {
+
+      foreach (var c in n.GetChildren(includeInternal))
+      {
+        if (c is T)
+        {
+          return (T)c;
+        }
+      }
+      return null;
+    }
   }
 }
