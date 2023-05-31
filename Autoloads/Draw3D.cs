@@ -76,6 +76,16 @@ namespace rosthouse.sharpest.addons
       return mi;
     }
 
+    public Label3D Text(Vector3 pos, String text, Color c = new Color())
+    {
+      Label3D l = new Label3D();
+      l.Text = text;
+      l.Billboard = BaseMaterial3D.BillboardModeEnum.Enabled;
+
+      this.AddChild(l);
+      return l;
+    }
+
     public void Clear()
     {
       foreach (var c in this.GetChildren())
