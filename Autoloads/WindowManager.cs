@@ -33,7 +33,6 @@ namespace rosthouse.sharpest.addons
       var w = new Window();
       w.AddChild(windowContent);
       w.WrapControls = true;
-      w.Size = (Vector2I)windowContent.Size;
       w.CloseRequested += () => w.QueueFree();
       w.SizeChanged += () => windowContent.Size = w.Size;
       windowContent.TreeExited += () => w.QueueFree();
