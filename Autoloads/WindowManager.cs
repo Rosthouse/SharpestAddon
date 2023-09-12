@@ -20,7 +20,6 @@ namespace rosthouse.sharpest.addons
       {
         _instance = this;
       }
-
     }
 
     public void OpenWindow(Control n)
@@ -28,16 +27,13 @@ namespace rosthouse.sharpest.addons
       this.OpenWindow(n, GetViewport().GetVisibleRect().Size / 2);
     }
 
-    public void OpenWindow(Control windowContent, Vector2 position)
+    public void OpenWindow(Control windowContent, Vector2 position, string title = "")
     {
-      var w = new Window();
-      w.AddChild(windowContent);
-      w.WrapControls = true;
-      w.CloseRequested += () => w.QueueFree();
-      w.SizeChanged += () => windowContent.Size = w.Size;
-      windowContent.TreeExited += () => w.QueueFree();
-      this.AddChild(w);
-      w.Popup(new Rect2I(position.RountToInt(), w.Size));
+      var lw = GD.Load<PackedScene>("res://addons/SharpestAddon/Nodes/light_window.tscn").Instantiate<LightWindow>();
+      lw.SetContent(windowContent, true);
+      lw.SetTitle(title);
+      lw.Position = position;
+      this.AddChild(lw);
     }
 
     public void OpenWindow(Control windowContent, Vector3 position)
