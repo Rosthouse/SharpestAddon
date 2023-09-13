@@ -7,7 +7,8 @@ public partial class LightWindow : Control
   private bool drag;
   private Vector2 offset;
   private Control contentContainer;
-
+  [Export] public bool Passthrough { get; set; } = false;
+  [Export] public bool RespectContentMinSize { get; set; } = false;
   // Called when the node enters the scene tree for the first time.
   public override void _Ready()
   {
@@ -43,7 +44,23 @@ public partial class LightWindow : Control
     if (@event is InputEventMouseMotion iemm && this.resize)
     {
       this.Size = iemm.Position - this.Position;
+
+      if (this.RespectContentMinSize)
+      {
+        var child = this.contentContainer.GetChild<Control>(0);
+        var minSize = this.contentContainer.GetChild<Control>(0).CustomMinimumSize;
+        this.Size = new Vector2(
+          Mathf.Max(this.Size.X, minSize.X),
+          Mathf.Max(this.Size.Y, minSize.Y)
+        );
+      }
       this.contentContainer.GetChild<Control>(0).Size = this.Size;
+      GetViewport().SetInputAsHandled();
+    }
+
+    if (!this.Passthrough)
+    {
+      GetViewport().SetInputAsHandled();
     }
   }
   public void SetTitle(string title)

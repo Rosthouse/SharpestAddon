@@ -30,10 +30,12 @@ namespace rosthouse.sharpest.addons
     public void OpenWindow(Control windowContent, Vector2 position, string title = "")
     {
       var lw = GD.Load<PackedScene>("res://addons/SharpestAddon/Nodes/light_window.tscn").Instantiate<LightWindow>();
+      this.AddChild(lw);
       lw.SetContent(windowContent, true);
       lw.SetTitle(title);
+      lw.Passthrough = true;
+      lw.RespectContentMinSize = true;
       lw.Position = position;
-      this.AddChild(lw);
     }
 
     public void OpenWindow(Control windowContent, Vector3 position)
