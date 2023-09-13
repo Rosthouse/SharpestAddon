@@ -35,7 +35,7 @@ public partial class LightWindow : Control
     }
     if (@event is InputEventMouseMotion iemm && this.drag)
     {
-      this.Position = iemm.Position - this.offset;
+      this.Position += iemm.Relative;
     }
   }
 
