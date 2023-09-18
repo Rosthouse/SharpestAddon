@@ -1,6 +1,6 @@
-# godotnetextensions
+# SharpestAddon
 
-A collection of .net extension classes for godot
+This repository contains a number of extensions, autoloads, nodes and scenes that I found myself using time and time again. It doesn't have a specific strategy what is in it, but rather what I actually use in several projects.
 
 ## Icons
 
