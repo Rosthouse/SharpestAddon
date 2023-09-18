@@ -1,0 +1,79 @@
+[gd_scene load_steps=4 format=3 uid="uid://cmalpspodvis5"]
+
+[ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/Gizmo3D.cs" id="1_rdp0a"]
+[ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/DrawLayer.cs" id="3_mlb5p"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ec30y"]
+radius = 0.0946787
+height = 0.98113
+
+[node name="Gizmo3D" type="Node3D"]
+script = ExtResource("1_rdp0a")
+
+[node name="Brush" type="Control" parent="."]
+unique_name_in_owner = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("3_mlb5p")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Brush"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -132.0
+offset_top = -59.0
+offset_right = -17.0
+offset_bottom = -19.0
+grow_horizontal = 0
+grow_vertical = 0
+metadata/_edit_group_ = true
+
+[node name="MoveBtn" type="Button" parent="Brush/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Move"
+
+[node name="RotateBtn" type="Button" parent="Brush/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Rotate"
+
+[node name="Transform" type="Node3D" parent="."]
+
+[node name="XAxis" type="Area3D" parent="Transform"]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
+collision_layer = 2147483648
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Transform/XAxis"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("CapsuleShape3D_ec30y")
+
+[node name="YAxis" type="Area3D" parent="Transform"]
+unique_name_in_owner = true
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.5, 0)
+collision_layer = 2147483648
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Transform/YAxis"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("CapsuleShape3D_ec30y")
+
+[node name="ZAxis" type="Area3D" parent="Transform"]
+unique_name_in_owner = true
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0.5)
+collision_layer = 2147483648
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Transform/ZAxis"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("CapsuleShape3D_ec30y")

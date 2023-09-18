@@ -31,7 +31,7 @@ public static class PhysicsDirectSpaceState3DExtensions
       return this.collider.AsGodotObject() as CollisionObject3D;
     }
   }
-  public static Nullable<PhysicsRayQueryResult3D> IntersectRayResult(this PhysicsDirectSpaceState3D dss, PhysicsRayQueryParameters3D parameters)
+  public static PhysicsRayQueryResult3D? IntersectRayResult(this PhysicsDirectSpaceState3D dss, PhysicsRayQueryParameters3D parameters)
   {
     var result = dss.IntersectRay(parameters);
     if (result.Count == 0)
@@ -48,28 +48,50 @@ public static class PhysicsDirectSpaceState3DExtensions
     );
   }
 
-/// <summary>
-/// Cast a ray from the camera, using the mouse as a focal point.
-/// </summary>
-/// <param name="dss">A Physics State, through which collisions are determined</param>
-/// <param name="collisionMask">Masking out certain parts of the world is done by giving a collision mask.</param>
-/// <param name="exclude">Alternatively to collisionMask, we can directly exclude certain RIDs.</param>
-/// <param name="rayLength">Given in meters, how far the ray should extend.</param>
-/// <param name="collideWithAreas">Areas are only hit, if this parameter is set to true.</param>
-/// <returns>A <see href="Nullable" /> containing either null or a <see href="PhysicsRayQueryResult3D" />.</returns>
-  public static Nullable<PhysicsRayQueryResult3D> CastRayFromCamera(this PhysicsDirectSpaceState3D dss, uint collisionMask = uint.MaxValue, Godot.Collections.Array<Rid> exclude = null, float rayLength = 1000, bool collideWithAreas = false)
+  /// <summary>
+  /// Cast a ray from the camera, using the mouse as a focal point.
+  /// </summary>
+  /// <param name="dss">A Physics State, through which collisions are determined</param>
+  /// <param name="collisionMask">Masking out certain parts of the world is done by giving a collision mask.</param>
+  /// <param name="exclude">Alternatively to collisionMask, we can directly exclude certain RIDs.</param>
+  /// <param name="rayLength">Given in meters, how far the ray should extend.</param>
+  /// <param name="collideWithAreas">Areas are only hit, if this parameter is set to true.</param>
+  /// <returns>A <see href="Nullable" /> containing either null or a <see href="PhysicsRayQueryResult3D" />.</returns>
+  public static PhysicsRayQueryResult3D? CastRayFromCamera(this PhysicsDirectSpaceState3D dss, uint collisionMask = uint.MaxValue, Godot.Collections.Array<Rid> exclude = null, float rayLength = 1000, bool collideWithAreas = false)
   {
     var st = (SceneTree)Engine.GetMainLoop();
     var vp = st.CurrentScene.GetViewport();
     var p = vp.GetMousePosition();
-    PhysicsRayQueryParameters3D query = new PhysicsRayQueryParameters3D();
-    query.From = vp.GetCamera3D().ProjectRayOrigin(p);
-    query.To = query.From + vp.GetCamera3D().ProjectRayNormal(p) * rayLength;
-    query.CollisionMask = collisionMask;
-    query.Exclude = exclude;
-    query.CollideWithAreas = collideWithAreas;
+
+    return dss.CastRayFromViewPort(p, collisionMask, exclude, rayLength, collideWithAreas);
+  }
+
+  /// <summary>
+  /// Cast a ray from the camera, using the mouse as a focal point.
+  /// </summary>
+  /// <param name="dss">A Physics State, through which collisions are determined</param>
+  /// <param name="collisionMask">Masking out certain parts of the world is done by giving a collision mask.</param>
+  /// <param name="exclude">Alternatively to collisionMask, we can directly exclude certain RIDs.</param>
+  /// <param name="rayLength">Given in meters, how far the ray should extend.</param>
+  /// <param name="collideWithAreas">Areas are only hit, if this parameter is set to true.</param>
+  /// <returns>A <see href="Nullable" /> containing either null or a <see href="PhysicsRayQueryResult3D" />.</returns>
+  public static PhysicsRayQueryResult3D? CastRayFromViewPort(this PhysicsDirectSpaceState3D dss, Vector2 pos, uint collisionMask = uint.MaxValue, Godot.Collections.Array<Rid> exclude = null, float rayLength = 1000, bool collideWithAreas = false)
+  {
+    var st = (SceneTree)Engine.GetMainLoop();
+    var vp = st.CurrentScene.GetViewport();
+
+    var from = vp.GetCamera3D().ProjectRayOrigin(pos);
+    PhysicsRayQueryParameters3D query = new PhysicsRayQueryParameters3D
+    {
+      From = from,
+      To = from + vp.GetCamera3D().ProjectRayNormal(pos) * rayLength,
+      CollisionMask = collisionMask,
+      Exclude = exclude,
+      CollideWithAreas = collideWithAreas
+    };
     var result = dss.IntersectRayResult(query);
     return result;
   }
+
 }
 
