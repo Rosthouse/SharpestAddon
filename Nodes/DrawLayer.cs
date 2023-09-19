@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection.Metadata;
 using Godot;
 
+[GlobalClass]
 public partial class DrawLayer : Control
 {
   private enum ItemType
@@ -93,9 +94,21 @@ public partial class DrawLayer : Control
     this.DrawCircle(screenPosStart, item.width, item.color);
   }
 
-  public void Arrow(Vector3 position, Vector3 direction, Color color)
+  public void DrawPoint(Vector3 position, Color c, float width = 1)
   {
-    this.items.Add(new Item() { points = new Vector3[] { position, position + direction }, color = color, type = ItemType.Line, width = 1 });
+    this.items.Add(new Item()
+    {
+      points = new Vector3[] { position },
+      color = c,
+      type = ItemType.Point,
+      width = width
+    });
+    this.QueueRedraw();
+  }
+
+  public void Arrow(Vector3 position, Vector3 direction, Color color, float width = 1)
+  {
+    this.items.Add(new Item() { points = new Vector3[] { position, position + direction }, color = color, type = ItemType.Line, width = width });
     this.QueueRedraw();
   }
 
