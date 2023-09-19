@@ -50,6 +50,7 @@ public partial class DrawLayer : Control
   public override void _Draw()
   {
     base._Draw();
+
     foreach (var item in items)
     {
       switch (item.type)

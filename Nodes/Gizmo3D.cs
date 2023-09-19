@@ -8,11 +8,15 @@ namespace rosthouse.sharpest.addons
 
   public partial class Gizmo3D : Node3D
   {
-
-    public static Gizmo3D Create()
+    public static uint MASK = (uint)1 << 31;
+    public static Gizmo3D Create(Node owner = null)
     {
-
-      return GD.Load<PackedScene>("res://addons/SharpestAddon/Nodes/gizmo_3d.tscn").Instantiate<Gizmo3D>();
+      var g = GD.Load<PackedScene>("res://addons/SharpestAddon/Nodes/gizmo_3d.tscn").Instantiate<Gizmo3D>();
+      if (owner != null)
+      {
+        g.Owner = owner;
+      }
+      return g;
     }
     public enum GizmoActionType
     {
@@ -24,6 +28,7 @@ namespace rosthouse.sharpest.addons
 
     private Vector3 transformDirection = Vector3.Inf;
     private DrawLayer cvl;
+    public Vector3 Movement { get; private set; } = Vector3.Zero;
 
     public override void _Ready()
     {
@@ -36,6 +41,8 @@ namespace rosthouse.sharpest.addons
       GetNode<Button>("%MoveBtn").Pressed += () => this.Mode = GizmoActionType.MOVE;
       GetNode<Button>("%RotateBtn").Pressed += () => this.Mode = GizmoActionType.ROTATE;
       this.cvl = GetNode<DrawLayer>("%Brush");
+
+      this.VisibilityChanged += () => this.cvl.QueueRedraw();
     }
 
     public override void _Input(InputEvent @event)
@@ -55,15 +62,15 @@ namespace rosthouse.sharpest.addons
 
       if (@event is InputEventMouseMotion iemm)
       {
-        var movement = Vector3.Zero;
+        this.Movement = Vector3.Zero;
         var mouseDelta = iemm.Relative * TranslateSpeed;
 
-        movement += GetViewport().GetCamera3D().GlobalTransform.Basis.Y * -mouseDelta.Y;
-        movement += GetViewport().GetCamera3D().GlobalTransform.Basis.X * mouseDelta.X;
+        Movement += GetViewport().GetCamera3D().GlobalTransform.Basis.Y * -mouseDelta.Y;
+        Movement += GetViewport().GetCamera3D().GlobalTransform.Basis.X * mouseDelta.X;
 
         var invDirection = Vector3.One * this.transformDirection;
-        movement *= invDirection;
-        this.GetParent<Node3D>().GlobalPosition += movement;
+        Movement *= invDirection;
+        this.GlobalPosition += Movement;
       }
     }
 
