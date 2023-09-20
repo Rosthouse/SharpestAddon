@@ -23,6 +23,7 @@ namespace rosthouse.sharpest.addons
       MOVE, ROTATE
     }
 
+    [Signal] public delegate void MovedEventHandler(Vector3 movment);
     [Export] public float TranslateSpeed { get; set; } = 0.01f;
     public GizmoActionType Mode { get; private set; } = GizmoActionType.MOVE;
 
@@ -49,7 +50,6 @@ namespace rosthouse.sharpest.addons
     {
 
       base._Input(@event);
-      GD.Print("Handling Gizmo input");
       if (@event.IsActionReleased("ui_left_click"))
       {
         this.transformDirection = Vector3.Inf;
@@ -71,14 +71,16 @@ namespace rosthouse.sharpest.addons
         var invDirection = Vector3.One * this.transformDirection;
         Movement *= invDirection;
         this.GlobalPosition += Movement;
+        this.EmitSignal(nameof(Moved), Movement);
       }
     }
 
 
     private void MoveGizmo(InputEvent @event, Vector3 direction)
     {
+      GD.Print($"Handling input for axis {direction}");
 
-      if (Input.IsActionJustPressed("ui_left_click"))
+      if (@event.IsActionPressed("ui_left_click") && !@event.IsEcho())
       {
         GD.Print($"Clicking axis {direction}");
         this.transformDirection = direction;
@@ -92,6 +94,9 @@ namespace rosthouse.sharpest.addons
 
     public override void _Process(double delta)
     {
+      if(!this.Visible){
+        return;
+      }
       switch (this.Mode)
       {
         case GizmoActionType.MOVE:
