@@ -3,7 +3,7 @@ using System;
 
 #if TOOLS
 
-namespace rosthouse.sharpest.addons
+namespace rosthouse.sharpest.addon
 {
 
   [Tool]

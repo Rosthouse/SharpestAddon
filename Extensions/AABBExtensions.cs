@@ -1,6 +1,6 @@
 using Godot;
 
-namespace rosthouse.sharpest.addons
+namespace rosthouse.sharpest.addon
 {
   public static class AABBExtensions
   {

@@ -2,10 +2,8 @@ using Godot;
 using System;
 using System.Reflection;
 
-namespace rosthouse.sharpest.addons
+namespace rosthouse.sharpest.addon
 {
-
-
   public partial class Gizmo3D : Node3D
   {
     public static uint MASK = (uint)1 << 31;

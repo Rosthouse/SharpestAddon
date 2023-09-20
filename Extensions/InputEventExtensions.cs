@@ -1,31 +1,36 @@
 
 
-using System.Reflection.Metadata.Ecma335;
 using Godot;
 
-public static class InputEventExtensions
+namespace rosthouse.sharpest.addon
 {
-  public static bool IsAnyAction(this InputEvent @event, params string[] actions)
+
+
+  public static class InputEventExtensions
   {
-    foreach (var action in actions)
+    public static bool IsAnyAction(this InputEvent @event, params string[] actions)
     {
-      if (@event.IsAction(action))
+      foreach (var action in actions)
       {
-        return true;
+        if (@event.IsAction(action))
+        {
+          return true;
+        }
       }
+      return false;
     }
-    return false;
+
+    public static bool IsAnyAction(params string[] actions)
+    {
+      foreach (var action in actions)
+      {
+        if (Input.IsActionPressed(action) || Input.IsActionJustPressed(action) || Input.IsActionJustReleased(action))
+        {
+          return true;
+        }
+      }
+      return false;
+    }
   }
 
-  public static bool IsAnyAction(params string[] actions)
-  {
-    foreach (var action in actions)
-    {
-      if (Input.IsActionPressed(action) || Input.IsActionJustPressed(action) || Input.IsActionJustReleased(action))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
 }

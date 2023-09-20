@@ -1,9 +1,15 @@
 using Godot;
 
-namespace rosthouse.sharpest.addons
+namespace rosthouse.sharpest.addon
 {
   public static class DecalExtensions
   {
+    /// <summary>
+    /// Retrieves the color of the decal at a certain posion inside itii
+    /// </summary>
+    /// <param name="d">A decal for which we want to retrieve a color from.</param>
+    /// <param name="position">The position inside the decals AABB.</param>
+    /// <returns>A color from the decal. If none is found, Colors.Mangenta is returned.</returns>
     public static Color GetColorAtPosition(this Decal d, Vector3 position)
     {
       var aabb = d.GetAabb();
@@ -35,6 +41,13 @@ namespace rosthouse.sharpest.addons
       }
     }
 
+    /// <summary>
+    /// Given a decal, this sets the color at a position inside the AABB of the decal.
+    /// </summary>
+    /// <param name="d">The decal where a new color wants to be set.</param>
+    /// <param name="position"></param>
+    /// <param name="color"></param>
+    /// <param name="radius"></param>
     public static void SetColorAtPosition(this Decal d, Vector3 position, Color color, int radius)
     {
       var aabb = d.GetAabb();

@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 
-namespace rosthouse.sharpest.addons
+namespace rosthouse.sharpest.addon
 {
     public partial class Quit : Node
     {

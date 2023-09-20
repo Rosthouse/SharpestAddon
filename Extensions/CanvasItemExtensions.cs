@@ -3,11 +3,15 @@
 using System.Globalization;
 using Godot;
 
-public static class CanvasItemExtensions
+namespace rosthouse.sharpest.addon
 {
 
-  public static Vector2 UnprojectPosition(this CanvasItem cvi, Vector3 position)
+  public static class CanvasItemExtensions
   {
-    return cvi.GetViewport().GetCamera3D().UnprojectPosition(position);
+
+    public static Vector2 UnprojectPosition(this CanvasItem cvi, Vector3 position)
+    {
+      return cvi.GetViewport().GetCamera3D().UnprojectPosition(position);
+    }
   }
 }

@@ -1,38 +1,42 @@
 using Godot;
 using System;
 
-/// <summary>
-/// Rotates its parent by the amount given as parameters.
-/// </summary>
-[GlobalClass]
-public partial class AutoRotator3D : Node3D
+namespace rosthouse.sharpest.addon
 {
-  [Export] public Vector3 amount;
-  [Export] private bool physicsProcess;
 
-  // Called every frame. 'delta' is the elapsed time since the previous frame.
-  public override void _Process(double delta)
+  /// <summary>
+  /// Rotates its parent by the amount given as parameters.
+  /// </summary>
+  [GlobalClass]
+  public partial class AutoRotator3D : Node3D
   {
-    if (physicsProcess)
+    [Export] public Vector3 amount;
+    [Export] private bool physicsProcess;
+
+    // Called every frame. 'delta' is the elapsed time since the previous frame.
+    public override void _Process(double delta)
     {
-      return;
+      if (physicsProcess)
+      {
+        return;
+      }
+      this.Rotate(delta);
     }
-    this.Rotate(delta);
-  }
 
-  public override void _PhysicsProcess(double delta)
-  {
-    if (!physicsProcess)
+    public override void _PhysicsProcess(double delta)
     {
-      return;
+      if (!physicsProcess)
+      {
+        return;
+      }
+
+      this.Rotate(delta);
     }
 
-    this.Rotate(delta);
-  }
-
-  private void Rotate(double delta)
-  {
-    var parent = this.GetParent<Node3D>();
-    parent.Quaternion *= Quaternion.FromEuler(this.amount * (float)delta);
+    private void Rotate(double delta)
+    {
+      var parent = this.GetParent<Node3D>();
+      parent.Quaternion *= Quaternion.FromEuler(this.amount * (float)delta);
+    }
   }
 }
