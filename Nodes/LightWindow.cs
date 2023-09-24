@@ -21,6 +21,8 @@ namespace rosthouse.sharpest.addon
       GetNode<Button>("%ResizeButton").ButtonUp += () => this.resize = false;
       GetNode<Label>("%WindowTitle").GuiInput += this.OnTitleInput;
       this.contentContainer = GetNode<Control>("%Content");
+      this.MouseEntered += () => GD.Print("Mouse entered");
+      this.MouseExited += () => GD.Print("Mouse exited");
     }
 
     private void OnTitleInput(InputEvent @event)
