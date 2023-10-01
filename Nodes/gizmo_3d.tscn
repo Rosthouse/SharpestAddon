@@ -1,4 +1,4 @@
-[gd_scene load_steps=4 format=3 uid="uid://cmalpspodvis5"]
+[gd_scene load_steps=5 format=3 uid="uid://cmalpspodvis5"]
 
 [ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/Gizmo3D.cs" id="1_rdp0a"]
 [ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/DrawLayer.cs" id="3_mlb5p"]
@@ -6,6 +6,9 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ec30y"]
 radius = 0.0946787
 height = 0.98113
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_1jy5i"]
+height = 0.0820495
 
 [node name="Gizmo3D" type="Node3D"]
 script = ExtResource("1_rdp0a")
@@ -46,34 +49,56 @@ unique_name_in_owner = true
 layout_mode = 2
 text = "Rotate"
 
-[node name="Transform" type="Node3D" parent="."]
+[node name="Translate" type="Node3D" parent="."]
 
-[node name="XAxis" type="Area3D" parent="Transform"]
+[node name="XAxis" type="Area3D" parent="Translate"]
 unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
 collision_layer = 2147483648
 collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Transform/XAxis"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Translate/XAxis"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ec30y")
 
-[node name="YAxis" type="Area3D" parent="Transform"]
+[node name="YAxis" type="Area3D" parent="Translate"]
 unique_name_in_owner = true
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.5, 0)
 collision_layer = 2147483648
 collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Transform/YAxis"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Translate/YAxis"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ec30y")
 
-[node name="ZAxis" type="Area3D" parent="Transform"]
+[node name="ZAxis" type="Area3D" parent="Translate"]
 unique_name_in_owner = true
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0.5)
 collision_layer = 2147483648
 collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Transform/ZAxis"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Translate/ZAxis"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ec30y")
+
+[node name="Rotate" type="Node3D" parent="."]
+
+[node name="YPlane" type="Area3D" parent="Rotate"]
+unique_name_in_owner = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Rotate/YPlane"]
+shape = SubResource("CylinderShape3D_1jy5i")
+
+[node name="ZPlane" type="Area3D" parent="Rotate"]
+unique_name_in_owner = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Rotate/ZPlane"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+shape = SubResource("CylinderShape3D_1jy5i")
+
+[node name="XPlane" type="Area3D" parent="Rotate"]
+unique_name_in_owner = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Rotate/XPlane"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+shape = SubResource("CylinderShape3D_1jy5i")

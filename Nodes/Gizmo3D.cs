@@ -4,6 +4,7 @@ using System.Reflection;
 
 namespace rosthouse.sharpest.addon
 {
+  [Tool]
   public partial class Gizmo3D : Node3D
   {
     public static uint MASK = (uint)1 << 31;
@@ -23,7 +24,7 @@ namespace rosthouse.sharpest.addon
 
     [Signal] public delegate void MovedEventHandler(Vector3 movment);
     [Export] public float TranslateSpeed { get; set; } = 0.01f;
-    public GizmoActionType Mode { get; private set; } = GizmoActionType.MOVE;
+    [Export] public GizmoActionType Mode { get; private set; } = GizmoActionType.MOVE;
 
     private Vector3 transformDirection = Vector3.Inf;
     private DrawLayer cvl;
@@ -33,15 +34,24 @@ namespace rosthouse.sharpest.addon
     {
       base._Ready();
 
-      GetNode<Area3D>("%XAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.MoveGizmo(@event, Vector3.Right);
-      GetNode<Area3D>("%YAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.MoveGizmo(@event, Vector3.Up);
-      GetNode<Area3D>("%ZAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.MoveGizmo(@event, Vector3.Back);
+      GetNode<Area3D>("%XAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.TranslateGizmo(@event, Vector3.Right);
+      GetNode<Area3D>("%YAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.TranslateGizmo(@event, Vector3.Up);
+      GetNode<Area3D>("%ZAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.TranslateGizmo(@event, Vector3.Back);
+
+      GetNode<Area3D>("%XPlane").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.RotateGizmo(@event, Vector3.Right);
+      GetNode<Area3D>("%YPlane").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.RotateGizmo(@event, Vector3.Up);
+      GetNode<Area3D>("%ZPlane").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.RotateGizmo(@event, Vector3.Back);
 
       GetNode<Button>("%MoveBtn").Pressed += () => this.Mode = GizmoActionType.MOVE;
       GetNode<Button>("%RotateBtn").Pressed += () => this.Mode = GizmoActionType.ROTATE;
       this.cvl = GetNode<DrawLayer>("%Brush");
 
       this.VisibilityChanged += () => this.cvl.QueueRedraw();
+    }
+
+    private void RotateGizmo(InputEvent @event, Vector3 right)
+    {
+      // To be implemented
     }
 
     public override void _Input(InputEvent @event)
@@ -74,7 +84,7 @@ namespace rosthouse.sharpest.addon
     }
 
 
-    private void MoveGizmo(InputEvent @event, Vector3 direction)
+    private void TranslateGizmo(InputEvent @event, Vector3 direction)
     {
       GD.Print($"Handling input for axis {direction}");
 
@@ -92,7 +102,8 @@ namespace rosthouse.sharpest.addon
 
     public override void _Process(double delta)
     {
-      if(!this.Visible){
+      if (!this.Visible)
+      {
         return;
       }
       switch (this.Mode)
@@ -103,9 +114,9 @@ namespace rosthouse.sharpest.addon
           this.cvl.Arrow(this.GlobalPosition, Vector3.Back, Colors.Blue, 5);
           break;
         case GizmoActionType.ROTATE:
-          this.cvl.Arc(this.GlobalPosition, Vector3.Right, Colors.Red);
-          this.cvl.Arc(this.GlobalPosition, Vector3.Up, Colors.Green);
-          this.cvl.Arc(this.GlobalPosition, Vector3.Back, Colors.Blue);
+          this.cvl.Disc(this.GlobalPosition, 50, Colors.Red);
+          this.cvl.Disc(this.GlobalPosition, 50, Colors.Green);
+          this.cvl.Disc(this.GlobalPosition, 50, Colors.Blue);
           break;
       }
     }
