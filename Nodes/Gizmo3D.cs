@@ -4,7 +4,6 @@ using System.Reflection;
 
 namespace rosthouse.sharpest.addon
 {
-  [Tool]
   public partial class Gizmo3D : Node3D
   {
     public static uint MASK = (uint)1 << 31;
@@ -23,16 +22,36 @@ namespace rosthouse.sharpest.addon
     }
 
     [Signal] public delegate void MovedEventHandler(Vector3 movment);
+    [Signal] public delegate void RotatedEventHandler(Vector3 rotation);
     [Export] public float TranslateSpeed { get; set; } = 0.01f;
-    [Export] public GizmoActionType Mode { get; private set; } = GizmoActionType.MOVE;
+    private GizmoActionType mode = GizmoActionType.MOVE;
+    [Export]
+    public GizmoActionType Mode
+    {
+      get => this.mode; private set
+      {
+        this.mode = value;
+        this.SetHandleVisibility(value);
+      }
+    }
+
 
     private Vector3 transformDirection = Vector3.Inf;
+    private Vector3 rotateDirection = Vector3.Inf;
     private DrawLayer cvl;
-    public Vector3 Movement { get; private set; } = Vector3.Zero;
+    private Node3D translateHandles;
+    private Node3D rotateHandles;
+
+    public Vector3 Translation { get; private set; } = Vector3.Zero;
+    public Vector3 RotationDelta { get; private set; } = Vector3.Zero;
+    public Vector2 RotateSpeed { get; private set; }
 
     public override void _Ready()
     {
       base._Ready();
+
+      this.translateHandles = GetNode<Node3D>("Translate");
+      this.rotateHandles = GetNode<Node3D>("Rotate");
 
       GetNode<Area3D>("%XAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.TranslateGizmo(@event, Vector3.Right);
       GetNode<Area3D>("%YAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.TranslateGizmo(@event, Vector3.Up);
@@ -49,11 +68,6 @@ namespace rosthouse.sharpest.addon
       this.VisibilityChanged += () => this.cvl.QueueRedraw();
     }
 
-    private void RotateGizmo(InputEvent @event, Vector3 right)
-    {
-      // To be implemented
-    }
-
     public override void _Input(InputEvent @event)
     {
 
@@ -61,6 +75,7 @@ namespace rosthouse.sharpest.addon
       if (@event.IsActionReleased("ui_left_click"))
       {
         this.transformDirection = Vector3.Inf;
+        this.rotateDirection = Vector3.Inf;
       }
 
       if (this.transformDirection == Vector3.Inf)
@@ -70,19 +85,57 @@ namespace rosthouse.sharpest.addon
 
       if (@event is InputEventMouseMotion iemm)
       {
-        this.Movement = Vector3.Zero;
+        this.Translation = Vector3.Zero;
         var mouseDelta = iemm.Relative * TranslateSpeed;
 
-        Movement += GetViewport().GetCamera3D().GlobalTransform.Basis.Y * -mouseDelta.Y;
-        Movement += GetViewport().GetCamera3D().GlobalTransform.Basis.X * mouseDelta.X;
+        Translation += GetViewport().GetCamera3D().GlobalTransform.Basis.Y * -mouseDelta.Y;
+        Translation += GetViewport().GetCamera3D().GlobalTransform.Basis.X * mouseDelta.X;
 
         var invDirection = Vector3.One * this.transformDirection;
-        Movement *= invDirection;
-        this.GlobalPosition += Movement;
-        this.EmitSignal(nameof(Moved), Movement);
+        Translation *= invDirection;
+        this.GlobalPosition += Translation;
+        this.EmitSignal(nameof(Moved), Translation);
       }
     }
 
+
+    public override void _Process(double delta)
+    {
+      if (!this.Visible)
+      {
+        return;
+      }
+
+      switch (this.Mode)
+      {
+        case GizmoActionType.MOVE:
+          this.cvl.Arrow(this.GlobalPosition, Vector3.Right, Colors.Red, 5);
+          this.cvl.Arrow(this.GlobalPosition, Vector3.Up, Colors.Green, 5);
+          this.cvl.Arrow(this.GlobalPosition, Vector3.Back, Colors.Blue, 5);
+          break;
+        case GizmoActionType.ROTATE:
+          // this.cvl.Disc(this.GlobalPosition, 50, Colors.Red);
+          // this.cvl.Disc(this.GlobalPosition, 50, Colors.Green);
+          // this.cvl.Disc(this.GlobalPosition, 50, Colors.Blue);
+          break;
+      }
+    }
+
+    private void SetHandleVisibility(GizmoActionType value)
+    {
+      switch (value)
+      {
+        case GizmoActionType.MOVE:
+          this.translateHandles.Visible = true;
+          this.rotateHandles.Visible = false;
+          break;
+        case GizmoActionType.ROTATE:
+          this.translateHandles.Visible = false;
+          this.rotateHandles.Visible = true;
+          break;
+      }
+      this.cvl.QueueRedraw();
+    }
 
     private void TranslateGizmo(InputEvent @event, Vector3 direction)
     {
@@ -100,26 +153,23 @@ namespace rosthouse.sharpest.addon
       }
     }
 
-    public override void _Process(double delta)
+
+    private void RotateGizmo(InputEvent @event, Vector3 normal)
     {
-      if (!this.Visible)
+      GD.Print($"Handling input for plane {normal}");
+
+      if (@event.IsActionPressed("ui_left_click") && !@event.IsEcho())
       {
-        return;
+        GD.Print($"Clicking plane {normal}");
+        this.rotateDirection = normal;
       }
-      switch (this.Mode)
+      if (@event.IsActionReleased("ui_left_click"))
       {
-        case GizmoActionType.MOVE:
-          this.cvl.Arrow(this.GlobalPosition, Vector3.Right, Colors.Red, 5);
-          this.cvl.Arrow(this.GlobalPosition, Vector3.Up, Colors.Green, 5);
-          this.cvl.Arrow(this.GlobalPosition, Vector3.Back, Colors.Blue, 5);
-          break;
-        case GizmoActionType.ROTATE:
-          this.cvl.Disc(this.GlobalPosition, 50, Colors.Red);
-          this.cvl.Disc(this.GlobalPosition, 50, Colors.Green);
-          this.cvl.Disc(this.GlobalPosition, 50, Colors.Blue);
-          break;
+        GD.Print($"Released {normal}");
+        this.rotateDirectionx = Vector3.Inf;
       }
     }
+
   }
 
 }

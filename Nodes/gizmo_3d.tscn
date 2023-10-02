@@ -1,4 +1,4 @@
-[gd_scene load_steps=5 format=3 uid="uid://cmalpspodvis5"]
+[gd_scene load_steps=9 format=3 uid="uid://cmalpspodvis5"]
 
 [ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/Gizmo3D.cs" id="1_rdp0a"]
 [ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/DrawLayer.cs" id="3_mlb5p"]
@@ -9,9 +9,29 @@ height = 0.98113
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_1jy5i"]
 height = 0.0820495
+radius = 1.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qq3t6"]
+albedo_color = Color(0.321569, 0.65098, 0, 1)
+
+[sub_resource type="TorusMesh" id="TorusMesh_as1r1"]
+material = SubResource("StandardMaterial3D_qq3t6")
+inner_radius = 0.875
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jrdlp"]
+albedo_color = Color(0, 0.533333, 0.67451, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jbmfo"]
+albedo_color = Color(0.929412, 0.192157, 0, 1)
 
 [node name="Gizmo3D" type="Node3D"]
 script = ExtResource("1_rdp0a")
+Translation = Vector3(0, 0, 0)
+RotationDelta = Vector3(0, 0, 0)
+RotateSpeed = Vector2(0, 0)
+transformDirection = Vector3(inf, inf, inf)
+cvl = null
+rotateDirection = Vector3(0, 0, 0)
 
 [node name="Brush" type="Control" parent="."]
 unique_name_in_owner = true
@@ -89,6 +109,10 @@ unique_name_in_owner = true
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Rotate/YPlane"]
 shape = SubResource("CylinderShape3D_1jy5i")
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Rotate/YPlane/CollisionShape3D"]
+mesh = SubResource("TorusMesh_as1r1")
+skeleton = NodePath("../..")
+
 [node name="ZPlane" type="Area3D" parent="Rotate"]
 unique_name_in_owner = true
 
@@ -96,9 +120,19 @@ unique_name_in_owner = true
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 shape = SubResource("CylinderShape3D_1jy5i")
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Rotate/ZPlane/CollisionShape3D"]
+mesh = SubResource("TorusMesh_as1r1")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_jrdlp")
+
 [node name="XPlane" type="Area3D" parent="Rotate"]
 unique_name_in_owner = true
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Rotate/XPlane"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CylinderShape3D_1jy5i")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Rotate/XPlane/CollisionShape3D"]
+mesh = SubResource("TorusMesh_as1r1")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_jbmfo")
