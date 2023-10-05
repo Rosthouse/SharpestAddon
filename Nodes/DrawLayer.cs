@@ -13,7 +13,8 @@ namespace rosthouse.sharpest.addon
     private enum ItemType
     {
       Point, Line, Arrow,
-      Arc
+      Arc,
+      Disc
     }
     private struct Item
     {
@@ -71,6 +72,9 @@ namespace rosthouse.sharpest.addon
           case ItemType.Arc:
             this._DrawArc(item);
             break;
+          case ItemType.Disc:
+            this._DrawDisc(item);
+            break;
         }
       }
     }
@@ -79,6 +83,22 @@ namespace rosthouse.sharpest.addon
     {
       var center = this.UnprojectPosition(item.points[0]);
       this.DrawArc(center, item.width, Mathf.Pi, Mathf.Pi * 2, 10, item.color);
+    }
+
+    private void _DrawDisc(Item item)
+    {
+      var center = this.UnprojectPosition(item.points[0]);
+      var radius = (item.points[1] - item.points[0]).Length();
+
+      var points = new Vector2[10];
+      for (int i = 0; i < 10; i++)
+      {
+        // var p = item.points[0] +
+      }
+
+      this.DrawArc(center, radius, 0, Mathf.Pi * 2, 10, item.color, item.width, true);
+      // this.DrawMultilineColors()
+      // this.DrawCircle(center, radius, item.color);
     }
 
     private void DrawArrow(Item item)
@@ -117,9 +137,15 @@ namespace rosthouse.sharpest.addon
       this.QueueRedraw();
     }
 
-    internal void Arc(Vector3 position, Vector3 normal, Color color)
+    public void Disc(Vector3 position, float radius, Color color, float width = 1)
     {
-      this.items.Add(new Item() { points = new Vector3[] { position, normal }, color = color, type = ItemType.Arc, width = 1 });
+      this.items.Add(new Item { points = new Vector3[] { position, position + Vector3.Forward * radius }, color = color, type = ItemType.Disc, width = 50 });
+      this.QueueRedraw();
+    }
+
+    public void Arc(Vector3 position, Vector3 normal, Color color)
+    {
+      this.items.Add(new Item() { points = new Vector3[] { position, normal }, color = color, type = ItemType.Arc, width = 50 });
       this.QueueRedraw();
     }
   }
