@@ -22,7 +22,7 @@ namespace rosthouse.sharpest.addon
     }
 
     [Signal] public delegate void MovedEventHandler(Vector3 movment);
-    [Signal] public delegate void RotatedEventHandler(Vector3 rotation);
+    [Signal] public delegate void RotatedEventHandler(Quaternion rotation);
     [Export] public float TranslateSpeed { get; set; } = 0.01f;
     private GizmoActionType mode = GizmoActionType.MOVE;
     [Export]
@@ -37,14 +37,15 @@ namespace rosthouse.sharpest.addon
 
 
     private Vector3 transformDirection = Vector3.Inf;
-    private Vector3 rotateDirection = Vector3.Inf;
+    private Vector3 rotationAxis = Vector3.Inf;
+    private Vector2 rotationMouseMask;
     private DrawLayer cvl;
     private Node3D translateHandles;
     private Node3D rotateHandles;
+    private Vector3 _Rotation;
 
     public Vector3 Translation { get; private set; } = Vector3.Zero;
-    public Vector3 RotationDelta { get; private set; } = Vector3.Zero;
-    public Vector2 RotateSpeed { get; private set; }
+    public float RotationSpeed { get; private set; } = 1f;
 
     public override void _Ready()
     {
@@ -53,13 +54,13 @@ namespace rosthouse.sharpest.addon
       this.translateHandles = GetNode<Node3D>("Translate");
       this.rotateHandles = GetNode<Node3D>("Rotate");
 
-      GetNode<Area3D>("%XAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.TranslateGizmo(@event, Vector3.Right);
-      GetNode<Area3D>("%YAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.TranslateGizmo(@event, Vector3.Up);
-      GetNode<Area3D>("%ZAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.TranslateGizmo(@event, Vector3.Back);
+      GetNode<Area3D>("%XAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.HandleTranslateClick(@event, Vector3.Right);
+      GetNode<Area3D>("%YAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.HandleTranslateClick(@event, Vector3.Up);
+      GetNode<Area3D>("%ZAxis").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.HandleTranslateClick(@event, Vector3.Back);
 
-      GetNode<Area3D>("%XPlane").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.RotateGizmo(@event, Vector3.Right);
-      GetNode<Area3D>("%YPlane").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.RotateGizmo(@event, Vector3.Up);
-      GetNode<Area3D>("%ZPlane").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.RotateGizmo(@event, Vector3.Back);
+      GetNode<Area3D>("%XPlane").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.HandleRotateClick(@event, Vector2.Down, Vector3.Right);
+      GetNode<Area3D>("%YPlane").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.HandleRotateClick(@event, Vector2.Right, Vector3.Up);
+      GetNode<Area3D>("%ZPlane").InputEvent += (Node camera, InputEvent @event, Vector3 position, Vector3 normal, long shapeIdx) => this.HandleRotateClick(@event, Vector2.Down, Vector3.Back);
 
       GetNode<Button>("%MoveBtn").Pressed += () => this.Mode = GizmoActionType.MOVE;
       GetNode<Button>("%RotateBtn").Pressed += () => this.Mode = GizmoActionType.ROTATE;
@@ -72,32 +73,49 @@ namespace rosthouse.sharpest.addon
     {
 
       base._Input(@event);
+
+
       if (@event.IsActionReleased("ui_left_click"))
       {
         this.transformDirection = Vector3.Inf;
-        this.rotateDirection = Vector3.Inf;
+        this.rotationAxis = Vector3.Inf;
       }
 
-      if (this.transformDirection == Vector3.Inf)
+      if (this.transformDirection == Vector3.Inf && this.rotationAxis == Vector3.Inf)
       {
         return;
       }
 
+
       if (@event is InputEventMouseMotion iemm)
       {
-        this.Translation = Vector3.Zero;
-        var mouseDelta = iemm.Relative * TranslateSpeed;
 
-        Translation += GetViewport().GetCamera3D().GlobalTransform.Basis.Y * -mouseDelta.Y;
-        Translation += GetViewport().GetCamera3D().GlobalTransform.Basis.X * mouseDelta.X;
+        // var mouseDelta = iemm.Relative * TranslateSpeed;
+        switch (mode)
+        {
+          case GizmoActionType.MOVE:
+            this.Translation = Vector3.Zero;
 
-        var invDirection = Vector3.One * this.transformDirection;
-        Translation *= invDirection;
-        this.GlobalPosition += Translation;
-        this.EmitSignal(nameof(Moved), Translation);
+            this.Translation += GetViewport().GetCamera3D().GlobalTransform.Basis.Y * iemm.Relative.Y * this.TranslateSpeed;
+            this.Translation += GetViewport().GetCamera3D().GlobalTransform.Basis.X * iemm.Relative.X * this.TranslateSpeed;
+
+            Translation *= Vector3.One * this.transformDirection;
+            this.GlobalPosition += Translation;
+            this.EmitSignal(nameof(Moved), Translation);
+            break;
+          case GizmoActionType.ROTATE:
+            this._Rotation = Vector3.Zero;
+            var rotAngle = (this.rotationMouseMask.Y * iemm.Relative.Y + this.rotationMouseMask.X * iemm.Relative.X) * this.RotationSpeed;
+            GD.Print($"Rotating by {rotAngle}/{Mathf.DegToRad(rotAngle)}");
+
+            var quat = new Quaternion(this.rotationAxis, Mathf.DegToRad(rotAngle));
+
+            this.RotateObjectLocal(this.rotationAxis, Mathf.DegToRad(rotAngle));
+            this.EmitSignal(nameof(Rotated), quat);
+            break;
+        }
       }
     }
-
 
     public override void _Process(double delta)
     {
@@ -137,7 +155,7 @@ namespace rosthouse.sharpest.addon
       this.cvl.QueueRedraw();
     }
 
-    private void TranslateGizmo(InputEvent @event, Vector3 direction)
+    private void HandleTranslateClick(InputEvent @event, Vector3 direction)
     {
       GD.Print($"Handling input for axis {direction}");
 
@@ -153,20 +171,21 @@ namespace rosthouse.sharpest.addon
       }
     }
 
-
-    private void RotateGizmo(InputEvent @event, Vector3 normal)
+    private void HandleRotateClick(InputEvent @event, Vector2 mouseMask, Vector3 normal)
     {
       GD.Print($"Handling input for plane {normal}");
 
       if (@event.IsActionPressed("ui_left_click") && !@event.IsEcho())
       {
         GD.Print($"Clicking plane {normal}");
-        this.rotateDirection = normal;
+        this.rotationAxis = normal;
+        this.rotationMouseMask = mouseMask;
       }
       if (@event.IsActionReleased("ui_left_click"))
       {
         GD.Print($"Released {normal}");
-        this.rotateDirectionx = Vector3.Inf;
+        this.rotationAxis = Vector3.Inf;
+        this.rotationMouseMask = Vector2.Zero;
       }
     }
 

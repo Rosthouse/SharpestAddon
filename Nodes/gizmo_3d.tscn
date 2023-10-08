@@ -26,12 +26,6 @@ albedo_color = Color(0.929412, 0.192157, 0, 1)
 
 [node name="Gizmo3D" type="Node3D"]
 script = ExtResource("1_rdp0a")
-Translation = Vector3(0, 0, 0)
-RotationDelta = Vector3(0, 0, 0)
-RotateSpeed = Vector2(0, 0)
-transformDirection = Vector3(inf, inf, inf)
-cvl = null
-rotateDirection = Vector3(0, 0, 0)
 
 [node name="Brush" type="Control" parent="."]
 unique_name_in_owner = true
