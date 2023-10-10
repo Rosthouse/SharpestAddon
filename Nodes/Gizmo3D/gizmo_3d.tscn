@@ -1,41 +1,31 @@
-[gd_scene load_steps=12 format=3 uid="uid://cmalpspodvis5"]
+[gd_scene load_steps=10 format=3 uid="uid://cmalpspodvis5"]
 
 [ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/Gizmo3D/Gizmo3D.cs" id="1_uicbw"]
 [ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/DrawLayer.cs" id="2_bee3o"]
 [ext_resource type="ArrayMesh" uid="uid://0121ilbgtef5" path="res://addons/SharpestAddon/Nodes/Gizmo3D/arrow_Cylinder.res" id="3_5v1fq"]
+[ext_resource type="Material" uid="uid://bpcnhe276aswc" path="res://addons/SharpestAddon/Nodes/Gizmo3D/x_mat.tres" id="4_xki41"]
+[ext_resource type="Material" uid="uid://b5d2y33ufullv" path="res://addons/SharpestAddon/Nodes/Gizmo3D/y_mat.tres" id="5_pxcsr"]
+[ext_resource type="Material" uid="uid://cqsss6o3kwloi" path="res://addons/SharpestAddon/Nodes/Gizmo3D/z_mat.tres" id="6_g55e6"]
+
+[sub_resource type="TorusMesh" id="TorusMesh_as1r1"]
+inner_radius = 0.875
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ec30y"]
 radius = 0.0946787
 height = 0.98113
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gwd0x"]
-albedo_color = Color(1, 0, 0.207843, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n7fl5"]
-albedo_color = Color(0, 1, 0.54902, 1)
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jrdlp"]
-albedo_color = Color(0, 0.533333, 0.67451, 1)
-
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_1jy5i"]
 height = 0.0820495
 radius = 1.0
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qq3t6"]
-albedo_color = Color(0.321569, 0.65098, 0, 1)
-
-[sub_resource type="TorusMesh" id="TorusMesh_as1r1"]
-material = SubResource("StandardMaterial3D_qq3t6")
-inner_radius = 0.875
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jbmfo"]
-albedo_color = Color(0.929412, 0.192157, 0, 1)
-
 [node name="Gizmo3D" type="Node3D"]
 script = ExtResource("1_uicbw")
+Scaling = 0.25
 
-[node name="Brush" type="Control" parent="."]
+[node name="Controls" type="Control" parent="."]
 unique_name_in_owner = true
+light_mask = 3
+visibility_layer = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -45,7 +35,7 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("2_bee3o")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Brush"]
+[node name="HBoxContainer" type="HBoxContainer" parent="Controls"]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
@@ -60,98 +50,120 @@ grow_horizontal = 0
 grow_vertical = 0
 metadata/_edit_group_ = true
 
-[node name="MoveBtn" type="Button" parent="Brush/HBoxContainer"]
+[node name="MoveBtn" type="Button" parent="Controls/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Move"
 
-[node name="RotateBtn" type="Button" parent="Brush/HBoxContainer"]
+[node name="RotateBtn" type="Button" parent="Controls/HBoxContainer"]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Rotate"
 
-[node name="Translate" type="Node3D" parent="."]
+[node name="RemoteTransform" type="RemoteTransform3D" parent="."]
+unique_name_in_owner = true
 
-[node name="XAxis" type="Area3D" parent="Translate"]
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="Translate" type="Node3D" parent="Visuals"]
+
+[node name="XDir" type="MeshInstance3D" parent="Visuals/Translate"]
+transform = Transform3D(-0.5, -4.37114e-08, 0, 4.37114e-08, -0.5, 0, 0, 0, 0.5, 0.5, 0, 0)
+layers = 2
+mesh = ExtResource("3_5v1fq")
+skeleton = NodePath("../../../Collision/Translate/XAxis/CollisionShape3D")
+surface_material_override/0 = ExtResource("4_xki41")
+
+[node name="YDir" type="MeshInstance3D" parent="Visuals/Translate"]
+transform = Transform3D(6.55671e-08, 0.5, 0, -0.5, 6.55671e-08, 0, 0, 0, 0.5, 0, 0.5, 0)
+layers = 2
+mesh = ExtResource("3_5v1fq")
+skeleton = NodePath("../../../Collision/Translate/YAxis/CollisionShape3D")
+surface_material_override/0 = ExtResource("5_pxcsr")
+
+[node name="ZDir" type="MeshInstance3D" parent="Visuals/Translate"]
+transform = Transform3D(-2.18557e-08, 0, 0.5, 0, 0.5, 0, -0.5, 0, -2.18557e-08, 0, 0, 0.5)
+layers = 2
+mesh = ExtResource("3_5v1fq")
+skeleton = NodePath("../../../Collision/Translate/ZAxis/CollisionShape3D")
+surface_material_override/0 = ExtResource("6_g55e6")
+
+[node name="Rotate" type="Node3D" parent="Visuals"]
+
+[node name="YPlane" type="MeshInstance3D" parent="Visuals/Rotate"]
+layers = 2
+mesh = SubResource("TorusMesh_as1r1")
+skeleton = NodePath("../../../Collision/Rotate/YPlane")
+surface_material_override/0 = ExtResource("5_pxcsr")
+
+[node name="ZPlane" type="MeshInstance3D" parent="Visuals/Rotate"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
+layers = 2
+mesh = SubResource("TorusMesh_as1r1")
+skeleton = NodePath("../../../Collision/Rotate/ZPlane")
+surface_material_override/0 = ExtResource("6_g55e6")
+
+[node name="XPlane" type="MeshInstance3D" parent="Visuals/Rotate"]
+transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
+layers = 2
+mesh = SubResource("TorusMesh_as1r1")
+skeleton = NodePath("../../../Collision/Rotate/XPlane")
+surface_material_override/0 = ExtResource("4_xki41")
+
+[node name="Collision" type="Node3D" parent="."]
+
+[node name="Translate" type="Node3D" parent="Collision"]
+
+[node name="XAxis" type="Area3D" parent="Collision/Translate"]
 unique_name_in_owner = true
 transform = Transform3D(0.999904, 0, 0.0138226, 0, 1, 0, -0.0138226, 0, 0.999904, 0.5, 0, 0)
 collision_layer = 2147483648
 collision_mask = 0
+monitoring = false
+monitorable = false
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Translate/XAxis"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Collision/Translate/XAxis"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ec30y")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Translate/XAxis/CollisionShape3D"]
-transform = Transform3D(-2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0)
-mesh = ExtResource("3_5v1fq")
-surface_material_override/0 = SubResource("StandardMaterial3D_gwd0x")
-
-[node name="YAxis" type="Area3D" parent="Translate"]
+[node name="YAxis" type="Area3D" parent="Collision/Translate"]
 unique_name_in_owner = true
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0.5, 0)
 collision_layer = 2147483648
 collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Translate/YAxis"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Collision/Translate/YAxis"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ec30y")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Translate/YAxis/CollisionShape3D"]
-transform = Transform3D(-2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0)
-mesh = ExtResource("3_5v1fq")
-surface_material_override/0 = SubResource("StandardMaterial3D_n7fl5")
-
-[node name="ZAxis" type="Area3D" parent="Translate"]
+[node name="ZAxis" type="Area3D" parent="Collision/Translate"]
 unique_name_in_owner = true
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0.5)
 collision_layer = 2147483648
 collision_mask = 0
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Translate/ZAxis"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Collision/Translate/ZAxis"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ec30y")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Translate/ZAxis/CollisionShape3D"]
-transform = Transform3D(-2.18557e-08, 0.5, 0, -0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0)
-mesh = ExtResource("3_5v1fq")
-surface_material_override/0 = SubResource("StandardMaterial3D_jrdlp")
+[node name="Rotate" type="Node3D" parent="Collision"]
 
-[node name="Rotate" type="Node3D" parent="."]
-
-[node name="YPlane" type="Area3D" parent="Rotate"]
+[node name="YPlane" type="Area3D" parent="Collision/Rotate"]
 unique_name_in_owner = true
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Rotate/YPlane"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Collision/Rotate/YPlane"]
 shape = SubResource("CylinderShape3D_1jy5i")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Rotate/YPlane/CollisionShape3D"]
-mesh = SubResource("TorusMesh_as1r1")
-skeleton = NodePath("../..")
-
-[node name="ZPlane" type="Area3D" parent="Rotate"]
+[node name="ZPlane" type="Area3D" parent="Collision/Rotate"]
 unique_name_in_owner = true
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Rotate/ZPlane"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Collision/Rotate/ZPlane"]
 transform = Transform3D(1, 0, 0, 0, -4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0)
 shape = SubResource("CylinderShape3D_1jy5i")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Rotate/ZPlane/CollisionShape3D"]
-mesh = SubResource("TorusMesh_as1r1")
-skeleton = NodePath("../..")
-surface_material_override/0 = SubResource("StandardMaterial3D_jrdlp")
-
-[node name="XPlane" type="Area3D" parent="Rotate"]
+[node name="XPlane" type="Area3D" parent="Collision/Rotate"]
 unique_name_in_owner = true
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Rotate/XPlane"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Collision/Rotate/XPlane"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CylinderShape3D_1jy5i")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Rotate/XPlane/CollisionShape3D"]
-mesh = SubResource("TorusMesh_as1r1")
-skeleton = NodePath("../..")
-surface_material_override/0 = SubResource("StandardMaterial3D_jbmfo")
-
-[node name="RemoteTransform" type="RemoteTransform3D" parent="."]
-unique_name_in_owner = true

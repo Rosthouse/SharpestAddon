@@ -26,7 +26,7 @@ namespace rosthouse.sharpest.addon
     }
 
     [Signal] public delegate void MovedEventHandler(Vector3 movment);
-    [Signal] public delegate void RotatedEventHandler(Quaternion rotation);
+    [Signal] public delegate void RotatedEventHandler(Vector3 axis, float angle);
     [Export] public float Scaling { get; private set; } = 1f;
     [Export] public float TranslateSpeed { get; set; } = 0.01f;
     [Export] public NodePath Remote { get => GetNode<RemoteTransform3D>("%RemoteTransform").RemotePath; set => GetNode<RemoteTransform3D>("%RemoteTransform").RemotePath = value; }
@@ -37,7 +37,7 @@ namespace rosthouse.sharpest.addon
     [Export]
     public GizmoActionType Mode
     {
-      get => this.mode; private set
+      get => this.mode; set
       {
         this.mode = value;
         this.SetHandleVisibility(value);
@@ -45,8 +45,12 @@ namespace rosthouse.sharpest.addon
     }
     private Vector2 rotationMouseMask;
     // private DrawLayer cvl;
-    private Node3D translateHandles;
-    private Node3D rotateHandles;
+    private Node3D translateVisuals;
+    private Node3D rotateVisuals;
+    private Control controls;
+    private Node3D visuals;
+    private Node3D collisions;
+
     // private Vector3 _Rotation;
 
     // public Vector3 Translation { get; private set; } = Vector3.Zero;
@@ -56,16 +60,19 @@ namespace rosthouse.sharpest.addon
     {
       base._Ready();
 
-      this.translateHandles = GetNode<Node3D>("Translate");
-      this.rotateHandles = GetNode<Node3D>("Rotate");
+      this.visuals = GetNode<Node3D>("Visuals");
+      this.collisions = GetNode<Node3D>("%Collisions");
+      this.translateVisuals = this.visuals.GetNode<Node3D>("Translate");
+      this.rotateVisuals = this.visuals.GetNode<Node3D>("Rotate");
+      this.controls = GetNode<Control>("%Controls");
 
-      GetNode<Area3D>("%XAxis").InputEvent += (_, @event, _, _, _) => this.HandleTranslateClick(@event, GetNode<MeshInstance3D>("%XAxis/CollisionShape3D/MeshInstance3D"));
-      GetNode<Area3D>("%YAxis").InputEvent += (_, @event, _, _, _) => this.HandleTranslateClick(@event, GetNode<MeshInstance3D>("%YAxis/CollisionShape3D/MeshInstance3D"));
-      GetNode<Area3D>("%ZAxis").InputEvent += (_, @event, _, _, _) => this.HandleTranslateClick(@event, GetNode<MeshInstance3D>("%ZAxis/CollisionShape3D/MeshInstance3D"));
+      GetNode<Area3D>("%XAxis").InputEvent += (_, @event, _, _, _) => this.HandleTranslateClick(@event, translateVisuals.GetNode<MeshInstance3D>("XDir"));
+      GetNode<Area3D>("%YAxis").InputEvent += (_, @event, _, _, _) => this.HandleTranslateClick(@event, translateVisuals.GetNode<MeshInstance3D>("YDir"));
+      GetNode<Area3D>("%ZAxis").InputEvent += (_, @event, _, _, _) => this.HandleTranslateClick(@event, translateVisuals.GetNode<MeshInstance3D>("ZDir"));
 
-      GetNode<Area3D>("%XPlane").InputEvent += (_, @event, _, _, _) => this.HandleRotateClick(@event, GetNode<MeshInstance3D>("%XPlane/CollisionShape3D/MeshInstance3D"), Vector3.Right);
-      GetNode<Area3D>("%YPlane").InputEvent += (_, @event, _, _, _) => this.HandleRotateClick(@event, GetNode<MeshInstance3D>("%YPlane/CollisionShape3D/MeshInstance3D"), Vector3.Up);
-      GetNode<Area3D>("%ZPlane").InputEvent += (_, @event, _, _, _) => this.HandleRotateClick(@event, GetNode<MeshInstance3D>("%ZPlane/CollisionShape3D/MeshInstance3D"), Vector3.Back);
+      GetNode<Area3D>("%XPlane").InputEvent += (_, @event, _, _, _) => this.HandleRotateClick(@event, rotateVisuals.GetNode<MeshInstance3D>("XPlane"), Vector3.Right);
+      GetNode<Area3D>("%YPlane").InputEvent += (_, @event, _, _, _) => this.HandleRotateClick(@event, rotateVisuals.GetNode<MeshInstance3D>("YPlane"), Vector3.Up);
+      GetNode<Area3D>("%ZPlane").InputEvent += (_, @event, _, _, _) => this.HandleRotateClick(@event, rotateVisuals.GetNode<MeshInstance3D>("ZPlane"), Vector3.Back);
 
       GetNode<Button>("%MoveBtn").Pressed += () => SetHandleVisibility(GizmoActionType.MOVE);
       GetNode<Button>("%RotateBtn").Pressed += () => SetHandleVisibility(GizmoActionType.ROTATE);
@@ -93,10 +100,13 @@ namespace rosthouse.sharpest.addon
         return;
       }
 
-      var size = GetViewport().GetCamera3D().Size / Scaling;
-      this.Scale = new(size, size, size);
+      var size = GetViewport().GetCamera3D().Size * Scaling * (GetViewport().GetCamera3D().GlobalPosition - this.GlobalPosition).Length();
+      this.visuals.Scale = new(size, size, size);
 
-      // this.dragStartPosition = GetViewport().GetMousePosition();
+      if (this.currentMesh == null)
+      {
+        return;
+      }
 
       switch (mode)
       {
@@ -117,28 +127,32 @@ namespace rosthouse.sharpest.addon
 
 
 
-    private void SetHandleVisibility(GizmoActionType value)
+    public void SetHandleVisibility(GizmoActionType value)
     {
 
-      if (translateHandles == null || rotateHandles == null)
+      if (translateVisuals == null || rotateVisuals == null)
       {
         return;
       }
-      this.translateHandles.Visible = false;
-      this.rotateHandles.Visible = false;
+      this.translateVisuals.Visible = false;
+      this.rotateVisuals.Visible = false;
+      this.controls.Visible = false;
 
       switch (value)
       {
         case GizmoActionType.MOVE:
-          this.translateHandles.Visible = true;
+          this.translateVisuals.Visible = true;
+          this.controls.Visible = true;
           break;
         case GizmoActionType.ROTATE:
-          this.rotateHandles.Visible = true;
+          this.rotateVisuals.Visible = true;
+          this.controls.Visible = true;
           break;
         case GizmoActionType.NONE:
           // do nothing
           break;
       }
+      GetViewport().SetInputAsHandled();
     }
 
     private void HandleTranslateClick(InputEvent @event, MeshInstance3D mesh)
@@ -194,6 +208,7 @@ namespace rosthouse.sharpest.addon
       GD.Print($"Diff{diff}");
 
       this.TranslateObjectLocal(diff);
+      this.EmitSignal(nameof(Moved), diff);
     }
 
     public void HandleRotation(MeshInstance3D mesh, Vector3 normal)
@@ -206,14 +221,11 @@ namespace rosthouse.sharpest.addon
       var dir = (GetViewport().GetCamera3D().GlobalPosition - this.GlobalPosition).Normalized();
       this.GlobalTransform = originalTransform;
 
-      if (normal.Dot(dir) > 0)
-      {
-        this.RotateObjectLocal(normal, start - angle);
-      }
-      else
-      {
-        this.RotateObjectLocal(normal, angle - start);
-      }
+      var rotAngle = normal.Dot(dir) > 0 ? start - angle : angle - start;
+      var quat = new Quaternion(normal, rotAngle);
+
+      this.RotateObjectLocal(normal, rotAngle);
+      this.EmitSignal(nameof(Rotated), normal, rotAngle);
     }
 
   }
