@@ -1,11 +1,21 @@
-[gd_scene load_steps=9 format=3 uid="uid://cmalpspodvis5"]
+[gd_scene load_steps=12 format=3 uid="uid://cmalpspodvis5"]
 
-[ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/Gizmo3D.cs" id="1_rdp0a"]
-[ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/DrawLayer.cs" id="3_mlb5p"]
+[ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/Gizmo3D/Gizmo3D.cs" id="1_uicbw"]
+[ext_resource type="Script" path="res://addons/SharpestAddon/Nodes/DrawLayer.cs" id="2_bee3o"]
+[ext_resource type="ArrayMesh" uid="uid://0121ilbgtef5" path="res://addons/SharpestAddon/Nodes/Gizmo3D/arrow_Cylinder.res" id="3_5v1fq"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ec30y"]
 radius = 0.0946787
 height = 0.98113
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gwd0x"]
+albedo_color = Color(1, 0, 0.207843, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n7fl5"]
+albedo_color = Color(0, 1, 0.54902, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jrdlp"]
+albedo_color = Color(0, 0.533333, 0.67451, 1)
 
 [sub_resource type="CylinderShape3D" id="CylinderShape3D_1jy5i"]
 height = 0.0820495
@@ -18,14 +28,11 @@ albedo_color = Color(0.321569, 0.65098, 0, 1)
 material = SubResource("StandardMaterial3D_qq3t6")
 inner_radius = 0.875
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jrdlp"]
-albedo_color = Color(0, 0.533333, 0.67451, 1)
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jbmfo"]
 albedo_color = Color(0.929412, 0.192157, 0, 1)
 
 [node name="Gizmo3D" type="Node3D"]
-script = ExtResource("1_rdp0a")
+script = ExtResource("1_uicbw")
 
 [node name="Brush" type="Control" parent="."]
 unique_name_in_owner = true
@@ -36,7 +43,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-script = ExtResource("3_mlb5p")
+script = ExtResource("2_bee3o")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Brush"]
 layout_mode = 1
@@ -67,13 +74,18 @@ text = "Rotate"
 
 [node name="XAxis" type="Area3D" parent="Translate"]
 unique_name_in_owner = true
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.5, 0, 0)
+transform = Transform3D(0.999904, 0, 0.0138226, 0, 1, 0, -0.0138226, 0, 0.999904, 0.5, 0, 0)
 collision_layer = 2147483648
 collision_mask = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Translate/XAxis"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ec30y")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Translate/XAxis/CollisionShape3D"]
+transform = Transform3D(-2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0)
+mesh = ExtResource("3_5v1fq")
+surface_material_override/0 = SubResource("StandardMaterial3D_gwd0x")
 
 [node name="YAxis" type="Area3D" parent="Translate"]
 unique_name_in_owner = true
@@ -85,6 +97,11 @@ collision_mask = 0
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ec30y")
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Translate/YAxis/CollisionShape3D"]
+transform = Transform3D(-2.18557e-08, -0.5, 0, 0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0)
+mesh = ExtResource("3_5v1fq")
+surface_material_override/0 = SubResource("StandardMaterial3D_n7fl5")
+
 [node name="ZAxis" type="Area3D" parent="Translate"]
 unique_name_in_owner = true
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, 0, 0, 0.5)
@@ -94,6 +111,11 @@ collision_mask = 0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Translate/ZAxis"]
 transform = Transform3D(-4.37114e-08, -1, 0, 1, -4.37114e-08, 0, 0, 0, 1, 0, 0, 0)
 shape = SubResource("CapsuleShape3D_ec30y")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Translate/ZAxis/CollisionShape3D"]
+transform = Transform3D(-2.18557e-08, 0.5, 0, -0.5, -2.18557e-08, 0, 0, 0, 0.5, 0, 0, 0)
+mesh = ExtResource("3_5v1fq")
+surface_material_override/0 = SubResource("StandardMaterial3D_jrdlp")
 
 [node name="Rotate" type="Node3D" parent="."]
 
@@ -130,3 +152,6 @@ shape = SubResource("CylinderShape3D_1jy5i")
 mesh = SubResource("TorusMesh_as1r1")
 skeleton = NodePath("../..")
 surface_material_override/0 = SubResource("StandardMaterial3D_jbmfo")
+
+[node name="RemoteTransform" type="RemoteTransform3D" parent="."]
+unique_name_in_owner = true
