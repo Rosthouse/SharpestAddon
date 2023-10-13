@@ -1,14 +1,14 @@
 using Godot;
+using System.Linq;
 using System;
 using System.Reflection;
 using System.Reflection.Metadata;
-using System.Security.Cryptography.X509Certificates;
 
 namespace rosthouse.sharpest.addon
 {
   public partial class Gizmo3D : Node3D
   {
-    public static uint MASK = (uint)1 << 31;
+    public static uint MASK = 32;
     public static Gizmo3D Create(Node owner = null)
     {
       var g = GD.Load<PackedScene>("res://addons/SharpestAddon/Nodes/Gizmo3D/gizmo_3d.tscn").Instantiate<Gizmo3D>();
@@ -19,7 +19,7 @@ namespace rosthouse.sharpest.addon
       return g;
     }
 
-    public enum GizmoActionType
+    public enum ActionType
     {
       NONE,
       MOVE, ROTATE,
@@ -30,188 +30,139 @@ namespace rosthouse.sharpest.addon
     [Export] public float Scaling { get; private set; } = 1f;
     [Export] public float TranslateSpeed { get; set; } = 0.01f;
     [Export] public NodePath Remote { get => GetNode<RemoteTransform3D>("%RemoteTransform").RemotePath; set => GetNode<RemoteTransform3D>("%RemoteTransform").RemotePath = value; }
-    private GizmoActionType mode = GizmoActionType.NONE;
     private Vector3 currentNormal;
-    private MeshInstance3D currentMesh;
+    private Handle currentHandle;
 
-    [Export]
-    public GizmoActionType Mode
-    {
-      get => this.mode; set
-      {
-        this.mode = value;
-        this.SetHandleVisibility(value);
-      }
-    }
-    private Vector2 rotationMouseMask;
-    // private DrawLayer cvl;
-    private Node3D translateVisuals;
-    private Node3D rotateVisuals;
+
+    private Node3D translate;
+    private Node3D rotate;
     private Control controls;
     private Node3D visuals;
-    private Node3D collisions;
 
-    // private Vector3 _Rotation;
-
-    // public Vector3 Translation { get; private set; } = Vector3.Zero;
-    public float RotationSpeed { get; private set; } = 1f;
 
     public override void _Ready()
     {
       base._Ready();
 
       this.visuals = GetNode<Node3D>("Visuals");
-      this.collisions = GetNode<Node3D>("%Collisions");
-      this.translateVisuals = this.visuals.GetNode<Node3D>("Translate");
-      this.rotateVisuals = this.visuals.GetNode<Node3D>("Rotate");
+
+      this.translate = GetNode<Node3D>("Translate");
+      this.rotate = GetNode<Node3D>("Rotate");
+
       this.controls = GetNode<Control>("%Controls");
-
-      GetNode<Area3D>("%XAxis").InputEvent += (_, @event, _, _, _) => this.HandleTranslateClick(@event, translateVisuals.GetNode<MeshInstance3D>("XDir"));
-      GetNode<Area3D>("%YAxis").InputEvent += (_, @event, _, _, _) => this.HandleTranslateClick(@event, translateVisuals.GetNode<MeshInstance3D>("YDir"));
-      GetNode<Area3D>("%ZAxis").InputEvent += (_, @event, _, _, _) => this.HandleTranslateClick(@event, translateVisuals.GetNode<MeshInstance3D>("ZDir"));
-
-      GetNode<Area3D>("%XPlane").InputEvent += (_, @event, _, _, _) => this.HandleRotateClick(@event, rotateVisuals.GetNode<MeshInstance3D>("XPlane"), Vector3.Right);
-      GetNode<Area3D>("%YPlane").InputEvent += (_, @event, _, _, _) => this.HandleRotateClick(@event, rotateVisuals.GetNode<MeshInstance3D>("YPlane"), Vector3.Up);
-      GetNode<Area3D>("%ZPlane").InputEvent += (_, @event, _, _, _) => this.HandleRotateClick(@event, rotateVisuals.GetNode<MeshInstance3D>("ZPlane"), Vector3.Back);
-
-      GetNode<Button>("%MoveBtn").Pressed += () => SetHandleVisibility(GizmoActionType.MOVE);
-      GetNode<Button>("%RotateBtn").Pressed += () => SetHandleVisibility(GizmoActionType.ROTATE);
-      this.SetHandleVisibility(this.mode);
     }
 
 
     public override void _Input(InputEvent @event)
     {
-      if (Input.IsActionJustReleased("ui_left_click"))
+      var st = (SceneTree)Engine.GetMainLoop();
+      var vp = st.CurrentScene.GetViewport();
+
+      if (@event is InputEventMouseButton ev)
       {
-        GD.Print("released");
-        this.mode = GizmoActionType.NONE;
-        this.currentMesh = null;
+
+        if (Input.IsActionJustReleased("ui_left_click"))
+        {
+          GD.Print("released");
+          if (this.currentHandle != null)
+          {
+            vp.SetInputAsHandled();
+            this.currentHandle = null;
+          }
+        }
+
+        if (Input.IsActionJustPressed("ui_left_click"))
+        {
+          var dss = PhysicsServer3D.SpaceGetDirectState(vp.World3D.Space);
+          var res = dss.CastRayFromCamera(collisionMask: MASK, collideWithAreas: true);
+          if (res.HasValue && res.Value.GetCollisionObject3D() is Handle h)
+          {
+            GD.Print($"Hit {res.Value.GetCollisionObject3D().Name}");
+            vp.SetInputAsHandled();
+            this.currentHandle = h;
+            var mesh = res.Value.GetCollisionObject3D().GetNode<MeshInstance3D>("Mesh");
+            switch (this.currentHandle.Mode)
+            {
+              case ActionType.MOVE:
+                this.HandleTranslateClick(ev, mesh);
+                break;
+              case ActionType.ROTATE:
+                this.HandleRotateClick(ev, mesh, res.Value.normal);
+                break;
+              case ActionType.NONE:
+                break;
+            }
+          }
+        }
       }
+
     }
-
-
     Transform3D originalTransform = new();
     Vector2 dragStartPosition = new(0, 0);
     public override void _Process(double delta)
     {
-      if (!this.Visible)
+      if (this.currentHandle == null)
       {
         return;
       }
 
-      var size = GetViewport().GetCamera3D().Size * Scaling * (GetViewport().GetCamera3D().GlobalPosition - this.GlobalPosition).Length();
-      this.visuals.Scale = new(size, size, size);
-
-      if (this.currentMesh == null)
+      switch (this.currentHandle.Mode)
       {
-        return;
-      }
-
-      switch (mode)
-      {
-        case GizmoActionType.MOVE:
-          this.HandleTranslation(this.currentMesh);
+        case ActionType.MOVE:
+          this.HandleTranslation(this.currentHandle);
           GetViewport().SetInputAsHandled();
           break;
-        case GizmoActionType.ROTATE:
-          this.HandleRotation(this.currentMesh, this.currentNormal);
+        case ActionType.ROTATE:
+          this.HandleRotation(this.currentHandle, this.currentNormal);
           GetViewport().SetInputAsHandled();
           break;
-        case GizmoActionType.NONE:
+        case ActionType.NONE:
           break;
       }
       this.originalTransform = this.GlobalTransform;
       this.dragStartPosition = GetViewport().GetMousePosition();
     }
 
-
-
-    public void SetHandleVisibility(GizmoActionType value)
+    private void HandleTranslateClick(InputEventMouseButton @event, MeshInstance3D mesh)
     {
-
-      if (translateVisuals == null || rotateVisuals == null)
-      {
-        return;
-      }
-      this.translateVisuals.Visible = false;
-      this.rotateVisuals.Visible = false;
-      this.controls.Visible = false;
-
-      switch (value)
-      {
-        case GizmoActionType.MOVE:
-          this.translateVisuals.Visible = true;
-          this.controls.Visible = true;
-          break;
-        case GizmoActionType.ROTATE:
-          this.rotateVisuals.Visible = true;
-          this.controls.Visible = true;
-          break;
-        case GizmoActionType.NONE:
-          // do nothing
-          break;
-      }
-      GetViewport().SetInputAsHandled();
-    }
-
-    private void HandleTranslateClick(InputEvent @event, MeshInstance3D mesh)
-    {
-
-      if (@event is not InputEventMouseButton)
-      {
-        return;
-      }
-
       if (Input.IsActionJustPressed("ui_left_click") && !@event.IsEcho())
       {
         GD.Print("clicked translate");
-        var ev = @event as InputEventMouseButton;
         originalTransform = this.GlobalTransform;
-        this.dragStartPosition = ev.Position;
-        this.mode = GizmoActionType.MOVE;
-        this.currentMesh = mesh;
+        this.dragStartPosition = @event.Position;
       }
     }
 
-    private void HandleRotateClick(InputEvent @event, MeshInstance3D mesh, Vector3 normal)
+    private void HandleRotateClick(InputEventMouseButton @event, MeshInstance3D mesh, Vector3 normal)
     {
-      if (@event is not InputEventMouseButton)
-      {
-        return;
-      }
       if (@event.IsActionPressed("ui_left_click") && !@event.IsEcho())
       {
-        var ev = @event as InputEventMouseButton;
-        this.dragStartPosition = ev.Position;
-        this.mode = GizmoActionType.ROTATE;
+        this.dragStartPosition = @event.Position;
         this.currentNormal = normal;
-        this.currentMesh = mesh;
       }
-
     }
 
-    public void HandleTranslation(MeshInstance3D mesh)
+    public void HandleTranslation(Handle h)
     {
       var cam = GetViewport().GetCamera3D();
       var mp = GetViewport().GetMousePosition();
-      var step = (cam.UnprojectPosition(mesh.GlobalPosition) - cam.UnprojectPosition(this.GlobalPosition)).Normalized();
+      var step = (cam.UnprojectPosition(h.GlobalPosition) - cam.UnprojectPosition(this.GlobalPosition)).Normalized();
       this.GlobalTransform = originalTransform;
 
       var dis = mp - dragStartPosition;
       var output = step * dis;
 
-      var dir = (mesh.GlobalPosition - this.GlobalPosition).Normalized();
+      var dir = h.Position.Normalized();
 
       var diff = dir * (output.X + output.Y) / 15f;
 
       GD.Print($"Diff{diff}");
 
-      this.TranslateObjectLocal(diff);
+      this.Translate(diff);
       this.EmitSignal(nameof(Moved), diff);
     }
 
-    public void HandleRotation(MeshInstance3D mesh, Vector3 normal)
+    public void HandleRotation(Handle h, Vector3 normal)
     {
       // material_override.albedo_color.a8 = 200
       var mp = GetViewport().GetMousePosition();
@@ -222,7 +173,6 @@ namespace rosthouse.sharpest.addon
       this.GlobalTransform = originalTransform;
 
       var rotAngle = normal.Dot(dir) > 0 ? start - angle : angle - start;
-      var quat = new Quaternion(normal, rotAngle);
 
       this.RotateObjectLocal(normal, rotAngle);
       this.EmitSignal(nameof(Rotated), normal, rotAngle);
