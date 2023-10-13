@@ -31,6 +31,7 @@ namespace rosthouse.sharpest.addon
     [Export] public float TranslateSpeed { get; set; } = 0.01f;
     [Export] public NodePath Remote { get => GetNode<RemoteTransform3D>("%RemoteTransform").RemotePath; set => GetNode<RemoteTransform3D>("%RemoteTransform").RemotePath = value; }
     private Vector3 currentNormal;
+    Vector2 dragStartPosition = new(0, 0);
     private Handle currentHandle;
 
 
@@ -50,6 +51,7 @@ namespace rosthouse.sharpest.addon
       this.rotate = GetNode<Node3D>("Rotate");
 
       this.controls = GetNode<Control>("%Controls");
+      this.VisibilityChanged += () => this.Rotation = Vector3.Zero;
     }
 
 
@@ -97,8 +99,6 @@ namespace rosthouse.sharpest.addon
       }
 
     }
-    Transform3D originalTransform = new();
-    Vector2 dragStartPosition = new(0, 0);
     public override void _Process(double delta)
     {
       if (this.currentHandle == null)
@@ -119,7 +119,6 @@ namespace rosthouse.sharpest.addon
         case ActionType.NONE:
           break;
       }
-      this.originalTransform = this.GlobalTransform;
       this.dragStartPosition = GetViewport().GetMousePosition();
     }
 
@@ -128,7 +127,6 @@ namespace rosthouse.sharpest.addon
       if (Input.IsActionJustPressed("ui_left_click") && !@event.IsEcho())
       {
         GD.Print("clicked translate");
-        originalTransform = this.GlobalTransform;
         this.dragStartPosition = @event.Position;
       }
     }
@@ -147,7 +145,6 @@ namespace rosthouse.sharpest.addon
       var cam = GetViewport().GetCamera3D();
       var mp = GetViewport().GetMousePosition();
       var step = (cam.UnprojectPosition(h.GlobalPosition) - cam.UnprojectPosition(this.GlobalPosition)).Normalized();
-      this.GlobalTransform = originalTransform;
 
       var dis = mp - dragStartPosition;
       var output = step * dis;
@@ -170,7 +167,6 @@ namespace rosthouse.sharpest.addon
       var start = parentCenter.AngleToPoint(dragStartPosition);
       var angle = parentCenter.AngleToPoint(mp);
       var dir = (GetViewport().GetCamera3D().GlobalPosition - this.GlobalPosition).Normalized();
-      this.GlobalTransform = originalTransform;
 
       var rotAngle = normal.Dot(dir) > 0 ? start - angle : angle - start;
 
