@@ -101,6 +101,11 @@ namespace rosthouse.sharpest.addon
     }
     public override void _Process(double delta)
     {
+      var size = (this.GlobalPosition - GetViewport().GetCamera3D().GlobalPosition).Length() * Scaling;
+      Vector3 scale = new(size, size, size);
+      this.translate.Scale = scale;
+      this.rotate.Scale = scale;
+
       if (this.currentHandle == null)
       {
         return;

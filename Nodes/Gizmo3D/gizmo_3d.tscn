@@ -21,7 +21,7 @@ inner_radius = 0.875
 
 [node name="Gizmo3D" type="Node3D"]
 script = ExtResource("1_uicbw")
-Scaling = 0.25
+Scaling = 0.15
 
 [node name="Controls" type="Control" parent="."]
 unique_name_in_owner = true
