@@ -3,7 +3,7 @@
 using System;
 using Godot;
 
-namespace rosthouse.sharpest.addons
+namespace rosthouse.sharpest.addon
 {
   public static class NodeExtensions
   {
@@ -73,6 +73,21 @@ namespace rosthouse.sharpest.addons
         }
       }
       return null;
+    }
+
+    public static Godot.Collections.Array<T> GetChildrenRecursive<[MustBeVariant] T>(this Node n, bool includeInternal = false) where T : Node
+    {
+      var children = new Godot.Collections.Array<T>();
+      foreach (var c in n.GetChildren(includeInternal))
+      {
+        if (c is T)
+        {
+          children.Add((T)c);
+        }
+        var t = c.GetChildrenRecursive<T>(includeInternal);
+        children.AddRange(t);
+      }
+      return children;
     }
   }
 }

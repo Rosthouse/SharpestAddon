@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace rosthouse.sharpest.addons
+namespace rosthouse.sharpest.addon
 {
   public partial class WindowManager : Node
   {
@@ -20,7 +20,6 @@ namespace rosthouse.sharpest.addons
       {
         _instance = this;
       }
-
     }
 
     public void OpenWindow(Control n)
@@ -28,15 +27,15 @@ namespace rosthouse.sharpest.addons
       this.OpenWindow(n, GetViewport().GetVisibleRect().Size / 2);
     }
 
-    public void OpenWindow(Control windowContent, Vector2 position)
+    public void OpenWindow(Control windowContent, Vector2 position, string title = "")
     {
-      var w = new Window();
-      w.AddChild(windowContent);
-      w.WrapControls = true;
-      w.CloseRequested += () => w.QueueFree();
-      windowContent.TreeExited += () => w.QueueFree();
-      this.AddChild(w);
-      w.Popup(new Rect2I(position.RountToInt(), w.Size));
+      var lw = GD.Load<PackedScene>("res://addons/SharpestAddon/Nodes/light_window.tscn").Instantiate<LightWindow>();
+      this.AddChild(lw);
+      lw.SetContent(windowContent, true);
+      lw.SetTitle(title);
+      lw.Passthrough = true;
+      lw.RespectContentMinSize = true;
+      lw.Position = position;
     }
 
     public void OpenWindow(Control windowContent, Vector3 position)

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   height="16"
+   viewBox="0 0 16 16"
+   width="16"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="RemoteTransform3D.svg"
+   inkscape:version="1.2.1 (9c6d41e410, 2022-07-14)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <defs
+      id="defs8" />
+   <sodipodi:namedview
+      id="namedview6"
+      pagecolor="#505050"
+      bordercolor="#ffffff"
+      borderopacity="1"
+      inkscape:showpageshadow="0"
+      inkscape:pageopacity="0"
+      inkscape:pagecheckerboard="1"
+      inkscape:deskcolor="#505050"
+      showgrid="false"
+      inkscape:zoom="29.5"
+      inkscape:cx="15.372881"
+      inkscape:cy="11.542373"
+      inkscape:window-width="2542"
+      inkscape:window-height="1336"
+      inkscape:window-x="1281"
+      inkscape:window-y="16"
+      inkscape:window-maximized="0"
+      inkscape:current-layer="svg4" />
+   <path
+      d="M 8,1 C 5.1419479,1.0000726 2.5010261,2.5248543 1.072,5 0.40533364,6.1553328 2.1383336,7.1553328 2.805,6 5.1149123,2.0026603 10.885088,2.0026603 13.195,6 13.861666,7.1553328 15.594666,6.1553328 14.928,5 13.498974,2.5248543 10.858052,1.0000726 8,1 Z M 8,5 C 6.18976,5.0003518 4.5823788,6.2104041 4.137,7.965 3.8191077,9.2173553 5.6947782,9.7189942 6.068,8.482 6.5971872,6.504779 9.4028128,6.504779 9.932,8.482 10.305222,9.7189942 12.157779,9.2229962 11.863,7.965 11.3946,6.2164089 9.81024,5.0003518 8,5 Z M 8,9 C 7.4477153,9 7,9.4477153 7,10 v 1 H 4 c 0,5.333331 8,5.333331 8,0 H 9 V 10 C 9,9.4477153 8.5522847,9 8,9 Z"
+      fill="#fc7f7f"
+      id="path2"
+      sodipodi:nodetypes="cccccccsccccssccccss" />
+   <text
+      xml:space="preserve"
+      style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:5.99597px;line-height:1.25;font-family:Bahnschrift;-inkscape-font-specification:Bahnschrift;fill:#fc7f7f;fill-opacity:1;stroke:none;stroke-width:0.149899"
+      x="12.923791"
+      y="13.449867"
+      id="text291"
+      transform="scale(0.93675965,1.0675097)"><tspan
+       sodipodi:role="line"
+       id="tspan289"
+       x="12.923791"
+       y="13.449867"
+       style="stroke-width:0.149899">E</tspan></text>
+</svg>
