@@ -17,7 +17,7 @@ namespace rosthouse.sharpest.addon
         {
           arr.Add(t);
         }
-        
+
         if (recursive)
         {
           arr.AddRange(c.GetChildren<T>(includeInternal, recursive));
@@ -93,6 +93,23 @@ namespace rosthouse.sharpest.addon
         children.AddRange(t);
       }
       return children;
+    }
+
+
+    public static void FreeChildren(this Node n, bool includeInternal = false)
+    {
+      foreach (var c in n.GetChildren(includeInternal))
+      {
+        c.Free();
+      }
+    }
+
+    public static void QueueFreeChildren(this Node n, bool includeInternal = false)
+    {
+      foreach (var c in n.GetChildren(includeInternal))
+      {
+        c.QueueFree();
+      }
     }
   }
 }
