@@ -3,7 +3,7 @@
 using System;
 using System.Collections;
 
-namespace rosthouse.sharpest.addon
+namespace rosthouse.sharpest.addon.utils
 {
 	public static class MathUtils
 	{

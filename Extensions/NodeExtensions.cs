@@ -8,7 +8,7 @@ namespace rosthouse.sharpest.addon
   public static class NodeExtensions
   {
 
-    public static Godot.Collections.Array<T> GetChildren<[MustBeVariant] T>(this Node n, bool includeInternal = false) where T : Node
+    public static Godot.Collections.Array<T> GetChildren<[MustBeVariant] T>(this Node n, bool includeInternal = false, bool recursive = false) where T : Node
     {
       var arr = new Godot.Collections.Array<T>();
       foreach (var c in n.GetChildren(includeInternal))
@@ -16,6 +16,11 @@ namespace rosthouse.sharpest.addon
         if (c is T t)
         {
           arr.Add(t);
+        }
+        
+        if (recursive)
+        {
+          arr.AddRange(c.GetChildren<T>(includeInternal, recursive));
         }
       }
       return arr;
