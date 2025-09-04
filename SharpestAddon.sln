@@ -1,0 +1,24 @@
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpestAddon", "SharpestAddon.csproj", "{D09FB388-0F3E-4288-9C79-E052EE1B1BDE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		ExportDebug|Any CPU = ExportDebug|Any CPU
+		ExportRelease|Any CPU = ExportRelease|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D09FB388-0F3E-4288-9C79-E052EE1B1BDE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D09FB388-0F3E-4288-9C79-E052EE1B1BDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D09FB388-0F3E-4288-9C79-E052EE1B1BDE}.ExportDebug|Any CPU.ActiveCfg = ExportDebug|Any CPU
+		{D09FB388-0F3E-4288-9C79-E052EE1B1BDE}.ExportDebug|Any CPU.Build.0 = ExportDebug|Any CPU
+		{D09FB388-0F3E-4288-9C79-E052EE1B1BDE}.ExportRelease|Any CPU.ActiveCfg = ExportRelease|Any CPU
+		{D09FB388-0F3E-4288-9C79-E052EE1B1BDE}.ExportRelease|Any CPU.Build.0 = ExportRelease|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
